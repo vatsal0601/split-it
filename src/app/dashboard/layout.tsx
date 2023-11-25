@@ -9,16 +9,13 @@ export const metadata: Metadata = {
 
 export default function DashboardLayout({
   children,
-  modal,
 }: {
   children: React.ReactNode;
-  modal: React.ReactNode;
 }) {
   return (
     <>
       <Navbar />
       <main className="container h-full">{children}</main>
-      {modal}
     </>
   );
 }

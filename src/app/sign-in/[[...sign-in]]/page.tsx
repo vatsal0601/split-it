@@ -2,7 +2,7 @@ import { SignIn as ClerkSignIn } from "@clerk/nextjs";
 
 export default function SignIn() {
   return (
-    <div className="container grid h-full place-content-center">
+    <main className="container grid h-full place-content-center">
       <ClerkSignIn
         appearance={{
           elements: {
@@ -10,6 +10,6 @@ export default function SignIn() {
           },
         }}
       />
-    </div>
+    </main>
   );
 }

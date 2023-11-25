@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils";
 import { Footer } from "@/components/footer";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemedClerkProvider } from "@/components/themed-clerk-provider";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "SplitIt",
@@ -47,6 +48,7 @@ export default function RootLayout({
           <ThemedClerkProvider>
             {children}
             <Footer />
+            <Toaster />
           </ThemedClerkProvider>
         </ThemeProvider>
       </body>
