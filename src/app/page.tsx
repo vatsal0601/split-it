@@ -17,12 +17,17 @@ export default async function Home() {
         <h1
           className={cn(
             typography({ variant: "h1" }),
-            "bg-gradient bg-clip-text text-center text-transparent"
+            "bg-gradient-to-br from-primary to-accent-foreground bg-clip-text text-center text-transparent"
           )}
         >
           Bill splitting just got a whole lot easier.
         </h1>
-        <p className={cn(typography({ variant: "p" }), "text-center")}>
+        <p
+          className={cn(
+            typography({ variant: "p" }),
+            "text-cente text-muted-foreground"
+          )}
+        >
           SplitIt allows you to split bills more simply while still keeping
           track of them.
         </p>

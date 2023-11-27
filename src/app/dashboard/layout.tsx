@@ -15,7 +15,7 @@ export default function DashboardLayout({
   return (
     <>
       <Navbar />
-      <main className="container h-full">{children}</main>
+      {children}
     </>
   );
 }

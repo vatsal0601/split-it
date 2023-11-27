@@ -32,7 +32,9 @@ export async function Navbar() {
           className={cn(typography({ variant: "h2" }), "font-bold")}
         >
           Split
-          <span className="bg-gradient bg-clip-text text-transparent">It</span>
+          <span className="bg-gradient-to-br from-primary to-accent-foreground bg-clip-text text-transparent">
+            It
+          </span>
         </Link>
         <ul className="inline-flex items-center space-x-2 lg:space-x-4">
           <li>
@@ -50,16 +52,18 @@ export async function Navbar() {
               </Avatar>
             </ClerkLoading>
             <ClerkLoaded>
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: "w-10 h-10",
-                    userButtonPopoverCard:
-                      "rounded-md border bg-popover shadow-md",
-                  },
-                }}
-                afterSignOutUrl="/"
-              />
+              <div className="h-10 w-10 rounded-full">
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "w-10 h-10",
+                      userButtonPopoverCard:
+                        "rounded-md border border-accent bg-popover shadow-md",
+                    },
+                  }}
+                  afterSignOutUrl="/"
+                />
+              </div>
             </ClerkLoaded>
           </li>
         </ul>

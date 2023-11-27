@@ -17,15 +17,17 @@ export function ThemedClerkProvider({
   const appearance: Appearance = isDark
     ? {
         variables: {
-          colorPrimary: "hsl(212 80% 69%)",
+          colorPrimary: "hsl(217.2 91.2% 59.8%)",
           colorDanger: "hsl(0 62.8% 30.6%)",
-          colorAlphaShade: "hsl(212 80% 69%)",
-          colorText: "hsl(212 8% 98.45%)",
-          colorTextOnPrimaryBackground: "hsl(212 8% 6.8999999999999995%)",
-          colorTextSecondary: "hsl(212 8% 56.9%)",
-          colorBackground: "hsl(212 52% 5.52%)",
+          colorAlphaShade: "hsl(217.2 91.2% 59.8%)",
+          colorText: "hsl(210 40% 98%)",
+          colorTextOnPrimaryBackground: "hsl(210 40% 98%)",
+          colorTextSecondary: "hsl(215 20.2% 65.1%)",
+          colorBackground: "hsl(222.2 84% 4.9%)",
+          colorInputBackground: "hsl(222.2 84% 4.9%)",
+          colorInputText: "hsl(210 40% 98%)",
           fontSmoothing: "antialiased",
-          borderRadius: "0.5rem",
+          borderRadius: "0.75rem",
         },
       }
     : {
@@ -38,7 +40,7 @@ export function ThemedClerkProvider({
           colorTextSecondary: "hsl(228 3.65% 41.3%)",
           colorBackground: "hsl(228 98.65% 98.26%)",
           fontSmoothing: "antialiased",
-          borderRadius: "0.5rem",
+          borderRadius: "0.75rem",
         },
       };
 
