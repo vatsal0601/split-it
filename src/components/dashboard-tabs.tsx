@@ -1,27 +1,24 @@
 import Link from "next/link";
+import map from "lodash/map";
 
 import { cn } from "@/lib/utils";
 import { typography } from "@/components/ui/typography";
 
-const TABS = [
-  { name: "Dashboard", href: "/dashboard" },
-  { name: "Friends", href: "/dashboard/friends" },
-  { name: "Groups", href: "/dashboard/groups" },
-  { name: "Activity", href: "/dashboard/activity" },
-];
+const TABS = {
+  Dashboard: "/dashboard",
+  Friends: "/dashboard/friends",
+  Groups: "/dashboard/groups",
+  Activity: "/dashboard/activity",
+} as const;
 
-export function DashboardTabs({
-  activeTab,
-}: {
-  activeTab: "Dashboard" | "Friends" | "Groups" | "Settings";
-}) {
+export function DashboardTabs({ activeTab }: { activeTab: keyof typeof TABS }) {
   return (
     <nav className="mb-10 border-b">
       <ul className="container flex items-center overflow-auto">
-        {TABS.map((tab) => {
-          const isActive = tab.name === activeTab;
+        {map(TABS, (value, key) => {
+          const isActive = key === activeTab;
           return (
-            <Link key={tab.name} href={tab.href}>
+            <Link key={key} href={value}>
               <li
                 className={cn(
                   typography({ variant: "p" }),
@@ -30,7 +27,7 @@ export function DashboardTabs({
                   isActive && "border-primary font-medium"
                 )}
               >
-                {tab.name}
+                {key}
               </li>
             </Link>
           );
