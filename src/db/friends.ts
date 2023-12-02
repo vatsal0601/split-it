@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, or } from "drizzle-orm";
 
 import { db } from "./index";
 import { friends } from "./schema";
@@ -11,7 +11,7 @@ export async function getFriends(userId: string) {
     .from(friends)
     .where(
       and(
-        eq(friends.fromUserId, userId),
+        or(eq(friends.fromUserId, userId), eq(friends.toUserId, userId)),
         eq(friends.status, "accepted"),
         eq(friends.isDeleted, false)
       )
@@ -65,13 +65,14 @@ export async function acceptFriendRequest({
   fromUserId: string;
   toUserId: string;
 }) {
+  // reverse the fromUserId and toUserId because the request is from the other user
   return db
     .update(friends)
     .set({ status: "accepted" })
     .where(
       and(
-        eq(friends.fromUserId, fromUserId),
-        eq(friends.toUserId, toUserId),
+        eq(friends.fromUserId, toUserId),
+        eq(friends.toUserId, fromUserId),
         eq(friends.status, "pending")
       )
     );

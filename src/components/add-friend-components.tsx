@@ -2,10 +2,15 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { deleteFriend, deleteRequest, sendRequest } from "@/actions/friends";
+import {
+  acceptRequest,
+  deleteFriend,
+  deleteRequest,
+  sendRequest,
+} from "@/actions/friends";
 import isEmpty from "lodash/isEmpty";
 import isNil from "lodash/isNil";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 
 import { cn } from "@/lib/utils";
@@ -46,19 +51,19 @@ export function AddFriendCommand({
   const { replace } = useRouter();
   const pathname = usePathname();
 
-  const openCommand = () => {
+  function openCommand() {
     const params = new URLSearchParams(window.location.search);
     params.set("add-friend", "true");
     replace(`${pathname}?${params.toString()}`);
-  };
+  }
 
-  const onCommandChange = (isOpen: boolean) => {
+  function onCommandChange(isOpen: boolean) {
     if (isOpen) return;
 
     const params = new URLSearchParams(window.location.search);
     params.delete("add-friend");
     replace(`${pathname}?${params.toString()}`);
-  };
+  }
 
   return (
     <>
@@ -81,7 +86,7 @@ export function AddFriendCommand({
   );
 }
 
-export const AddFriendInput = ({ initialValue }: { initialValue: string }) => {
+export function AddFriendInput({ initialValue }: { initialValue: string }) {
   const [search, setSearch] = React.useState(
     initialValue === "true" ? "" : initialValue
   );
@@ -89,7 +94,7 @@ export const AddFriendInput = ({ initialValue }: { initialValue: string }) => {
   const { replace } = useRouter();
   const pathname = usePathname();
 
-  const handleSearch = (value: string) => {
+  function handleSearch(value: string) {
     const params = new URLSearchParams(window.location.search);
 
     if (!isEmpty(value)) {
@@ -102,7 +107,7 @@ export const AddFriendInput = ({ initialValue }: { initialValue: string }) => {
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
-  };
+  }
 
   return (
     <CommandInput
@@ -112,7 +117,7 @@ export const AddFriendInput = ({ initialValue }: { initialValue: string }) => {
       name="add-friend"
     />
   );
-};
+}
 
 interface CommandUserProps {
   fromUserId: string;
@@ -141,7 +146,7 @@ function CommandUserInternal({
   return (
     <CommandItem
       onSelect={handleSubmit}
-      className="gap-2 disabled:opacity-50"
+      className="cursor-pointer gap-2 disabled:opacity-50"
       disabled={pending}
     >
       <Avatar className={cn("h-6 w-6", pending && "opacity-50")}>
@@ -225,29 +230,29 @@ export function FriendsDropdownMenu({
   const pathname = usePathname();
   const [isPending, startTransition] = React.useTransition();
 
-  const reset = () => {
+  function reset() {
     const params = new URLSearchParams(window.location.search);
     params.delete("show-requests");
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
-  };
+  }
 
-  const showRequests = () => {
+  function showRequests() {
     const params = new URLSearchParams(window.location.search);
     params.set("show-requests", "received");
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
-  };
+  }
 
-  const showSentRequests = () => {
+  function showSentRequests() {
     const params = new URLSearchParams(window.location.search);
     params.set("show-requests", "sent");
     startTransition(() => {
       replace(`${pathname}?${params.toString()}`);
     });
-  };
+  }
 
   let triggerText = "Showing your friends";
   if (isShowingRequests && !isShowingSentRequests)
@@ -292,12 +297,10 @@ export function FriendsDropdownMenu({
 }
 
 export function DeleteConfirmationDialog({
-  children,
   isShowingSentRequests,
   fromUserId,
   toUserId,
 }: {
-  children: React.ReactNode;
   isShowingSentRequests: boolean;
   fromUserId: string;
   toUserId: string;
@@ -350,7 +353,11 @@ export function DeleteConfirmationDialog({
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>{children}</AlertDialogTrigger>
+      <AlertDialogTrigger asChild>
+        <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-destructive/90 hover:text-destructive-foreground">
+          <UserMinusIcon className="h-6 w-6" />
+        </button>
+      </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -368,5 +375,57 @@ export function DeleteConfirmationDialog({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+  );
+}
+
+export function AddFriendButton({
+  username,
+  fromUserId,
+  toUserId,
+}: {
+  username: string | null;
+  fromUserId: string;
+  toUserId: string;
+}) {
+  const [formState, formAction] = useFormState(acceptRequest, null);
+  const { toast } = useToast();
+  const formRef = React.useRef<HTMLFormElement>(null);
+
+  React.useEffect(() => {
+    if (isNil(formState)) return;
+
+    const { success } = formState;
+
+    if (success) {
+      toast({
+        description: `@${username} added to your friends list`,
+      });
+      return;
+    }
+
+    toast({
+      variant: "destructive",
+      description: `Failed to add @${username} to your friends list`,
+    });
+  }, [formState, toast, username]);
+
+  function handleSubmit() {
+    toast({
+      description: `Adding @${username} to your friends list`,
+    });
+    formRef.current?.requestSubmit();
+  }
+
+  return (
+    <form ref={formRef} action={formAction} className="h-full">
+      <input type="hidden" name="from-user-id" value={fromUserId} />
+      <input type="hidden" name="to-user-id" value={toUserId} />
+      <button
+        onClick={handleSubmit}
+        className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-primary/90 hover:text-primary-foreground"
+      >
+        <UserPlusIcon className="h-6 w-6" />
+      </button>
+    </form>
   );
 }

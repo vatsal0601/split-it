@@ -3,7 +3,6 @@ import { clerkClient, currentUser } from "@clerk/nextjs";
 import { type User as UserType } from "@clerk/nextjs/server";
 import isNil from "lodash/isNil";
 import size from "lodash/size";
-import { UserMinusIcon, UserPlusIcon } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +11,7 @@ import {
   getFriends,
 } from "@/db/friends";
 import {
+  AddFriendButton,
   AddFriendCommand,
   AddFriendInput,
   CommandUser,
@@ -35,52 +35,52 @@ import {
 import { typography } from "@/components/ui/typography";
 
 function User({
-  user,
+  currentUser,
   fromUserId,
   isShowingRequests,
   isShowingSentRequests,
 }: {
-  user: UserType;
+  currentUser: UserType;
   fromUserId: string;
   isShowingRequests: boolean;
   isShowingSentRequests: boolean;
 }) {
-  const firstName = user.firstName ?? "";
-  const lastName = user.lastName ?? "";
+  const firstName = currentUser.firstName ?? "";
+  const lastName = currentUser.lastName ?? "";
   const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
 
   return (
     <li className="flex items-center justify-between gap-4 rounded-md border">
       <div className="flex items-center gap-4 p-3">
         <Avatar>
-          <AvatarImage src={user.imageUrl} alt={userInitials} />
+          <AvatarImage src={currentUser.imageUrl} alt={userInitials} />
           <AvatarFallback>{userInitials}</AvatarFallback>
         </Avatar>
         <div>
           <h4 className={cn(typography({ variant: "p" }), "font-medium")}>
-            {user.firstName} {user.lastName}
+            {currentUser.firstName} {currentUser.lastName}
           </h4>
-          {!isNil(user.username) ? (
-            <p className={typography({ variant: "muted" })}>@{user.username}</p>
+          {!isNil(currentUser.username) ? (
+            <p className={typography({ variant: "muted" })}>
+              @{currentUser.username}
+            </p>
           ) : null}
         </div>
       </div>
       <Tooltip>
         <TooltipTrigger asChild>
           {isShowingRequests ? (
-            <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-primary/90 hover:text-primary-foreground">
-              <UserPlusIcon className="h-6 w-6" />
-            </button>
+            <AddFriendButton
+              username={currentUser.username}
+              fromUserId={fromUserId}
+              toUserId={currentUser.id}
+            />
           ) : (
             <DeleteConfirmationDialog
               isShowingSentRequests={isShowingSentRequests}
               fromUserId={fromUserId}
-              toUserId={user.id}
-            >
-              <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-destructive/90 hover:text-destructive-foreground">
-                <UserMinusIcon className="h-6 w-6" />
-              </button>
-            </DeleteConfirmationDialog>
+              toUserId={currentUser.id}
+            />
           )}
         </TooltipTrigger>
         <TooltipContent side="bottom">
@@ -109,9 +109,7 @@ export default async function Friends({
   }
 
   let users: UserType[] = [];
-  let friendIds:
-    | Awaited<ReturnType<typeof getFriends>>
-    | Awaited<ReturnType<typeof getFriendRequests>> = [];
+  let friendIds: string[] = [];
   let searchUsers: UserType[] = [];
   const friendRequestSent = await getFriendRequestsSent(user.id);
   const friendRequestSentIds = friendRequestSent.map((friend) => friend.userId);
@@ -119,17 +117,17 @@ export default async function Friends({
   const isShowingSentRequests = searchParams["show-requests"] === "sent";
 
   if (isShowingRequests) {
-    friendIds = await getFriendRequests(user.id);
+    const friends = await getFriendRequests(user.id);
+    friendIds = friends.map((friend) => friend.userId);
   } else if (isShowingSentRequests) {
-    friendIds = friendRequestSent;
+    friendIds = friendRequestSentIds;
   } else {
-    friendIds = await getFriends(user.id);
+    const friends = await getFriends(user.id);
+    friendIds = friends.map((friend) => friend.userId);
   }
 
   if (size(friendIds) > 0) {
-    users = await clerkClient.users.getUserList({
-      userId: friendIds.map((friend) => friend.userId),
-    });
+    users = await clerkClient.users.getUserList({ userId: friendIds });
   }
 
   if (!isNil(searchParams["add-friend"])) {
@@ -146,6 +144,7 @@ export default async function Friends({
 
   // Remove current user from search results and to whom friend request has been sent
   searchUsers = searchUsers.filter((searchUser) => {
+    if (friendIds.includes(searchUser.id)) return false;
     if (friendRequestSentIds.includes(searchUser.id)) return false;
     if (searchUser.id === user.id) return false;
     return true;
@@ -166,35 +165,41 @@ export default async function Friends({
             >
               <AddFriendInput initialValue={searchParams["add-friend"] ?? ""} />
               <CommandList className="my-2 transition-[height]">
-                <CommandEmpty>No results found</CommandEmpty>
-                <CommandGroup>
-                  {size(searchUsers) > 0 ? (
+                <CommandEmpty>
+                  <p className="px-2">
+                    {size(searchUsers) > 0
+                      ? "No results found"
+                      : "You've either added all our users to your friend list or have sent friend request to them"}
+                  </p>
+                </CommandEmpty>
+                {size(searchUsers) > 0 ? (
+                  <CommandGroup>
                     <p className={cn(typography({ variant: "muted" }), "mb-2")}>
                       Click on the user or press enter to send them friend
                       request
                     </p>
-                  ) : null}
-                  {searchUsers.map((searchUser) => {
-                    const firstName = searchUser.firstName ?? "";
-                    const lastName = searchUser.lastName ?? "";
-                    const userInitials = `${firstName[0] ?? ""}${
-                      lastName[0] ?? ""
-                    }`;
+                    {searchUsers.map((searchUser) => {
+                      const firstName = searchUser.firstName ?? "";
+                      const lastName = searchUser.lastName ?? "";
+                      const userInitials = `${firstName[0] ?? ""}${
+                        lastName[0] ?? ""
+                      }`;
 
-                    return (
-                      <CommandUser
-                        key={searchUser.id}
-                        fromUserId={user.id}
-                        toUserId={searchUser.id}
-                        firstName={firstName}
-                        lastName={lastName}
-                        username={searchUser.username}
-                        userInitials={userInitials}
-                        prfileImage={searchUser.imageUrl}
-                      />
-                    );
-                  })}
-                </CommandGroup>
+                      return (
+                        <CommandUser
+                          key={searchUser.id}
+                          fromUserId={user.id}
+                          toUserId={searchUser.id}
+                          firstName={firstName}
+                          lastName={lastName}
+                          username={searchUser.username}
+                          userInitials={userInitials}
+                          prfileImage={searchUser.imageUrl}
+                        />
+                      );
+                    })}
+                  </CommandGroup>
+                ) : null}
               </CommandList>
             </AddFriendCommand>
           </div>
@@ -204,12 +209,12 @@ export default async function Friends({
         {size(users) > 0 ? (
           <TooltipProvider>
             <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {users.map((user) => {
+              {users.map((currentUser) => {
                 return (
                   <User
-                    key={user.id}
+                    key={currentUser.id}
                     fromUserId={user.id}
-                    user={user}
+                    currentUser={currentUser}
                     isShowingRequests={isShowingRequests}
                     isShowingSentRequests={isShowingSentRequests}
                   />
