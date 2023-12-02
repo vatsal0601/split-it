@@ -25,7 +25,7 @@ export default async function Home() {
         <p
           className={cn(
             typography({ variant: "p" }),
-            "text-cente text-muted-foreground"
+            "text-center text-muted-foreground"
           )}
         >
           SplitIt allows you to split bills more simply while still keeping
