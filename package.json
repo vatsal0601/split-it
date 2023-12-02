@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "migrations:generate": "drizzle-kit generate:pg --config=./src/drizzle.config.ts"
+    "migrations:generate": "drizzle-kit generate:pg --config=./src/drizzle.config.ts",
+    "migrations:run": "node -r esbuild-register ./src/db/migrate.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.27.1",
@@ -26,12 +27,14 @@
     "clsx": "^2.0.0",
     "cmdk": "^0.2.0",
     "date-fns": "^2.30.0",
+    "dotenv": "^16.3.1",
     "drizzle-orm": "^0.29.0",
     "geist": "^1.1.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.292.0",
     "next": "14.0.2",
     "next-themes": "^0.2.1",
+    "postgres": "^3.4.3",
     "react": "^18",
     "react-day-picker": "^8.9.1",
     "react-dom": "^18",
