@@ -71,7 +71,7 @@ export default async function Dashboard() {
               className="w-full rounded-t-none"
               asChild
             >
-              <Link href="/dashboard/friends?show-requests=true">
+              <Link href="/dashboard/friends?show-requests=received">
                 <span className="mr-2">View all friend requests</span>
                 <MoveRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
               </Link>
@@ -94,7 +94,7 @@ export default async function Dashboard() {
               className="w-full rounded-t-none"
               asChild
             >
-              <Link href="/dashboard/friends?show-requests=true">
+              <Link href="/dashboard/friends?show-requests=received">
                 <span className="mr-2">View all groups</span>
                 <MoveRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
               </Link>

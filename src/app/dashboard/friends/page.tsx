@@ -1,3 +1,4 @@
+import * as React from "react";
 import { redirect } from "next/navigation";
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import { type User as UserType } from "@clerk/nextjs/server";
@@ -10,27 +11,19 @@ import {
   getFriendRequestsSent,
   getFriends,
 } from "@/db/friends";
+import { DashboardTabs } from "@/components/dashboard-tabs";
 import {
   AddFriendButton,
-  AddFriendCommand,
-  AddFriendInput,
-  CommandUser,
   DeleteConfirmationDialog,
-  FriendsDropdownMenu,
-} from "@/components/add-friend-components";
-import { DashboardTabs } from "@/components/dashboard-tabs";
+  FriendsToggle,
+} from "@/components/friends-client-components";
+import { AddFriendCommand } from "@/components/friends-server-components";
+import { SearchInput } from "@/components/search-input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  CommandEmpty,
-  CommandGroup,
-  CommandList,
-} from "@/components/ui/command";
-import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { typography } from "@/components/ui/typography";
 
@@ -68,21 +61,19 @@ function User({
         </div>
       </div>
       <Tooltip>
-        <TooltipTrigger asChild>
-          {isShowingRequests ? (
-            <AddFriendButton
-              username={currentUser.username}
-              fromUserId={fromUserId}
-              toUserId={currentUser.id}
-            />
-          ) : (
-            <DeleteConfirmationDialog
-              isShowingSentRequests={isShowingSentRequests}
-              fromUserId={fromUserId}
-              toUserId={currentUser.id}
-            />
-          )}
-        </TooltipTrigger>
+        {isShowingRequests ? (
+          <AddFriendButton
+            username={currentUser.username}
+            fromUserId={fromUserId}
+            toUserId={currentUser.id}
+          />
+        ) : (
+          <DeleteConfirmationDialog
+            isShowingSentRequests={isShowingSentRequests}
+            fromUserId={fromUserId}
+            toUserId={currentUser.id}
+          />
+        )}
         <TooltipContent side="bottom">
           <span>
             {isShowingRequests
@@ -100,7 +91,11 @@ function User({
 export default async function Friends({
   searchParams,
 }: {
-  searchParams: { "add-friend": string; "show-requests": string };
+  searchParams: {
+    "add-friend": string | undefined;
+    "show-requests": string | undefined;
+    search: string | undefined;
+  };
 }) {
   const user = await currentUser();
 
@@ -110,7 +105,6 @@ export default async function Friends({
 
   let users: UserType[] = [];
   let friendIds: string[] = [];
-  let searchUsers: UserType[] = [];
   const friendRequestSent = await getFriendRequestsSent(user.id);
   const friendRequestSentIds = friendRequestSent.map((friend) => friend.userId);
   const isShowingRequests = searchParams["show-requests"] === "received";
@@ -127,83 +121,33 @@ export default async function Friends({
   }
 
   if (size(friendIds) > 0) {
-    users = await clerkClient.users.getUserList({ userId: friendIds });
+    users = await clerkClient.users.getUserList({
+      userId: friendIds,
+      query: searchParams["search"],
+    });
   }
-
-  if (!isNil(searchParams["add-friend"])) {
-    if (searchParams["add-friend"] === "true")
-      searchUsers = await clerkClient.users.getUserList({
-        limit: 10,
-      });
-    else
-      searchUsers = await clerkClient.users.getUserList({
-        query: searchParams["add-friend"],
-        limit: 10,
-      });
-  }
-
-  // Remove current user from search results and to whom friend request has been sent
-  searchUsers = searchUsers.filter((searchUser) => {
-    if (friendIds.includes(searchUser.id)) return false;
-    if (friendRequestSentIds.includes(searchUser.id)) return false;
-    if (searchUser.id === user.id) return false;
-    return true;
-  });
 
   return (
     <>
       <DashboardTabs activeTab="Friends" />
-      <main className="container h-full">
-        <div className="mb-10 flex flex-col items-end justify-between gap-4 md:flex-row-reverse md:items-center">
-          <div className="flex items-center gap-4">
-            <FriendsDropdownMenu
-              isShowingRequests={isShowingRequests}
-              isShowingSentRequests={isShowingSentRequests}
-            />
+      <main className="container h-full space-y-10">
+        <div className="space-y-5">
+          <div className="flex flex-col items-end justify-between gap-4 md:flex-row-reverse md:items-center">
             <AddFriendCommand
-              isCommandOpen={!isNil(searchParams["add-friend"])}
-            >
-              <AddFriendInput initialValue={searchParams["add-friend"] ?? ""} />
-              <CommandList className="my-2 transition-[height]">
-                <CommandEmpty>
-                  <p className="px-2">
-                    {size(searchUsers) > 0
-                      ? "No results found"
-                      : "You've either added all our users to your friend list or have sent friend request to them"}
-                  </p>
-                </CommandEmpty>
-                {size(searchUsers) > 0 ? (
-                  <CommandGroup>
-                    <p className={cn(typography({ variant: "muted" }), "mb-2")}>
-                      Click on the user or press enter to send them friend
-                      request
-                    </p>
-                    {searchUsers.map((searchUser) => {
-                      const firstName = searchUser.firstName ?? "";
-                      const lastName = searchUser.lastName ?? "";
-                      const userInitials = `${firstName[0] ?? ""}${
-                        lastName[0] ?? ""
-                      }`;
-
-                      return (
-                        <CommandUser
-                          key={searchUser.id}
-                          fromUserId={user.id}
-                          toUserId={searchUser.id}
-                          firstName={firstName}
-                          lastName={lastName}
-                          username={searchUser.username}
-                          userInitials={userInitials}
-                          prfileImage={searchUser.imageUrl}
-                        />
-                      );
-                    })}
-                  </CommandGroup>
-                ) : null}
-              </CommandList>
-            </AddFriendCommand>
+              userId={user.id}
+              addFriendParam={searchParams["add-friend"]}
+              friendIds={friendIds}
+              friendRequestSentIds={friendRequestSentIds}
+            />
+            <SearchInput
+              initialValue={searchParams["search"] ?? ""}
+              placeholder="Search friends"
+            />
           </div>
-          <Input placeholder="Search friends" className="md:max-w-lg" />
+          <FriendsToggle
+            isShowingRequests={isShowingRequests}
+            isShowingSentRequests={isShowingSentRequests}
+          />
         </div>
 
         {size(users) > 0 ? (

@@ -10,6 +10,7 @@ import {
 } from "@/actions/friends";
 import isEmpty from "lodash/isEmpty";
 import isNil from "lodash/isNil";
+import trim from "lodash/trim";
 import { PlusIcon, UserMinusIcon, UserPlusIcon } from "lucide-react";
 import { useFormState, useFormStatus } from "react-dom";
 
@@ -32,12 +33,8 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { TooltipTrigger } from "@/components/ui/tooltip";
 import { typography } from "@/components/ui/typography";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -87,9 +84,7 @@ export function AddFriendCommand({
 }
 
 export function AddFriendInput({ initialValue }: { initialValue: string }) {
-  const [search, setSearch] = React.useState(
-    initialValue === "true" ? "" : initialValue
-  );
+  const [search, setSearch] = React.useState(initialValue);
   const [isPending, startTransition] = React.useTransition();
   const { replace } = useRouter();
   const pathname = usePathname();
@@ -98,7 +93,7 @@ export function AddFriendInput({ initialValue }: { initialValue: string }) {
     const params = new URLSearchParams(window.location.search);
 
     if (!isEmpty(value)) {
-      params.set("add-friend", value);
+      params.set("add-friend", trim(value));
     } else {
       params.set("add-friend", "true");
     }
@@ -219,83 +214,6 @@ export function CommandUser(props: CommandUserProps) {
   );
 }
 
-export function FriendsDropdownMenu({
-  isShowingRequests,
-  isShowingSentRequests,
-}: {
-  isShowingRequests: boolean;
-  isShowingSentRequests: boolean;
-}) {
-  const { replace } = useRouter();
-  const pathname = usePathname();
-  const [isPending, startTransition] = React.useTransition();
-
-  function reset() {
-    const params = new URLSearchParams(window.location.search);
-    params.delete("show-requests");
-    startTransition(() => {
-      replace(`${pathname}?${params.toString()}`);
-    });
-  }
-
-  function showRequests() {
-    const params = new URLSearchParams(window.location.search);
-    params.set("show-requests", "received");
-    startTransition(() => {
-      replace(`${pathname}?${params.toString()}`);
-    });
-  }
-
-  function showSentRequests() {
-    const params = new URLSearchParams(window.location.search);
-    params.set("show-requests", "sent");
-    startTransition(() => {
-      replace(`${pathname}?${params.toString()}`);
-    });
-  }
-
-  let triggerText = "Showing your friends";
-  if (isShowingRequests && !isShowingSentRequests)
-    triggerText = "Showing received friend requests";
-  if (isShowingSentRequests && !isShowingRequests)
-    triggerText = "Showing sent friend requests";
-
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <div>
-          <Button variant="outline" size="sm" className="sm:hidden">
-            {triggerText}
-          </Button>
-          <Button variant="outline" className="hidden sm:inline-flex">
-            {triggerText}
-          </Button>
-        </div>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuCheckboxItem
-          checked={!isShowingRequests && !isShowingSentRequests}
-          onCheckedChange={reset}
-        >
-          Your friends
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={isShowingRequests && !isShowingSentRequests}
-          onCheckedChange={showRequests}
-        >
-          Received friend requests
-        </DropdownMenuCheckboxItem>
-        <DropdownMenuCheckboxItem
-          checked={isShowingSentRequests && !isShowingRequests}
-          onCheckedChange={showSentRequests}
-        >
-          Sent friend requests
-        </DropdownMenuCheckboxItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
-}
-
 export function DeleteConfirmationDialog({
   isShowingSentRequests,
   fromUserId,
@@ -354,9 +272,11 @@ export function DeleteConfirmationDialog({
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-destructive/90 hover:text-destructive-foreground">
-          <UserMinusIcon className="h-6 w-6" />
-        </button>
+        <TooltipTrigger asChild>
+          <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-destructive/90 hover:text-destructive-foreground">
+            <UserMinusIcon className="h-6 w-6" />
+          </button>
+        </TooltipTrigger>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -420,12 +340,98 @@ export function AddFriendButton({
     <form ref={formRef} action={formAction} className="h-full">
       <input type="hidden" name="from-user-id" value={fromUserId} />
       <input type="hidden" name="to-user-id" value={toUserId} />
-      <button
-        onClick={handleSubmit}
-        className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-primary/90 hover:text-primary-foreground"
-      >
-        <UserPlusIcon className="h-6 w-6" />
-      </button>
+      <TooltipTrigger asChild>
+        <button
+          onClick={handleSubmit}
+          className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-primary/90 hover:text-primary-foreground"
+        >
+          <UserPlusIcon className="h-6 w-6" />
+        </button>
+      </TooltipTrigger>
     </form>
+  );
+}
+
+export function FriendsToggle({
+  isShowingRequests,
+  isShowingSentRequests,
+}: {
+  isShowingRequests: boolean;
+  isShowingSentRequests: boolean;
+}) {
+  const { replace } = useRouter();
+  const pathname = usePathname();
+  const [isPending, startTransition] = React.useTransition();
+
+  function reset() {
+    const params = new URLSearchParams(window.location.search);
+    params.delete("show-requests");
+    startTransition(() => {
+      replace(`${pathname}?${params.toString()}`);
+    });
+  }
+
+  function showRequests() {
+    const params = new URLSearchParams(window.location.search);
+    params.set("show-requests", "received");
+    startTransition(() => {
+      replace(`${pathname}?${params.toString()}`);
+    });
+  }
+
+  function showSentRequests() {
+    const params = new URLSearchParams(window.location.search);
+    params.set("show-requests", "sent");
+    startTransition(() => {
+      replace(`${pathname}?${params.toString()}`);
+    });
+  }
+
+  function handleOnValueChange(value: string) {
+    if (value === "friends") reset();
+    if (value === "received") showRequests();
+    if (value === "sent") showSentRequests();
+  }
+
+  let value = "friends";
+  if (isShowingRequests && !isShowingSentRequests) value = "received";
+  if (isShowingSentRequests && !isShowingRequests) value = "sent";
+
+  return (
+    <div>
+      <ToggleGroup
+        value={value}
+        onValueChange={handleOnValueChange}
+        type="single"
+        size="sm"
+        className="flex-wrap justify-start md:hidden"
+      >
+        <ToggleGroupItem value="friends" aria-label="Your friends">
+          Your friends
+        </ToggleGroupItem>
+        <ToggleGroupItem value="received" aria-label="Friend requests">
+          Friend requests
+        </ToggleGroupItem>
+        <ToggleGroupItem value="sent" aria-label="Sent requests">
+          Sent requests
+        </ToggleGroupItem>
+      </ToggleGroup>
+      <ToggleGroup
+        value={value}
+        onValueChange={handleOnValueChange}
+        type="single"
+        className="hidden flex-wrap justify-start md:flex"
+      >
+        <ToggleGroupItem value="friends" aria-label="Your friends">
+          Your friends
+        </ToggleGroupItem>
+        <ToggleGroupItem value="received" aria-label="Friend requests">
+          Friend requests
+        </ToggleGroupItem>
+        <ToggleGroupItem value="sent" aria-label="Sent requests">
+          Sent requests
+        </ToggleGroupItem>
+      </ToggleGroup>
+    </div>
   );
 }
