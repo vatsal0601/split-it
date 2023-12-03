@@ -12,7 +12,7 @@ export default async function Home() {
   const isUserSignedIn = !isNil(user);
 
   return (
-    <main className="container pt-24 md:flex md:h-full md:items-center md:justify-between md:gap-12 md:pt-0">
+    <main className="container h-full pt-24 md:flex md:items-center md:justify-between md:gap-12 md:pt-0">
       <section className="mx-auto max-w-lg space-y-4 md:text-left">
         <h1
           className={cn(
