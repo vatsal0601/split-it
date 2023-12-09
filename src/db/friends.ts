@@ -1,4 +1,4 @@
-import { and, eq, or } from "drizzle-orm";
+import { and, desc, eq, or } from "drizzle-orm";
 
 import { db } from "./index";
 import { friends } from "./schema";
@@ -6,7 +6,8 @@ import { friends } from "./schema";
 export async function getFriends(userId: string) {
   return db
     .select({
-      userId: friends.toUserId,
+      toUserId: friends.toUserId,
+      fromUserId: friends.fromUserId,
     })
     .from(friends)
     .where(
@@ -15,7 +16,8 @@ export async function getFriends(userId: string) {
         eq(friends.status, "accepted"),
         eq(friends.isDeleted, false)
       )
-    );
+    )
+    .orderBy(desc(friends.updatedAt));
 }
 
 export async function getFriendRequests(userId: string) {
@@ -30,7 +32,25 @@ export async function getFriendRequests(userId: string) {
         eq(friends.status, "pending"),
         eq(friends.isDeleted, false)
       )
-    );
+    )
+    .orderBy(desc(friends.updatedAt));
+}
+
+export async function getFirst5FriendRequests(userId: string) {
+  return db
+    .select({
+      userId: friends.fromUserId,
+    })
+    .from(friends)
+    .where(
+      and(
+        eq(friends.toUserId, userId),
+        eq(friends.status, "pending"),
+        eq(friends.isDeleted, false)
+      )
+    )
+    .limit(5)
+    .orderBy(desc(friends.updatedAt));
 }
 
 export async function getFriendRequestsSent(userId: string) {
@@ -45,7 +65,8 @@ export async function getFriendRequestsSent(userId: string) {
         eq(friends.status, "pending"),
         eq(friends.isDeleted, false)
       )
-    );
+    )
+    .orderBy(desc(friends.updatedAt));
 }
 
 export async function sendFriendRequest({
@@ -68,7 +89,7 @@ export async function acceptFriendRequest({
   // reverse the fromUserId and toUserId because the request is from the other user
   return db
     .update(friends)
-    .set({ status: "accepted" })
+    .set({ status: "accepted", updatedAt: new Date() })
     .where(
       and(
         eq(friends.fromUserId, toUserId),
@@ -87,12 +108,19 @@ export async function deleteFriend({
 }) {
   return db
     .update(friends)
-    .set({ isDeleted: true })
+    .set({ isDeleted: true, updatedAt: new Date() })
     .where(
-      and(
-        eq(friends.fromUserId, fromUserId),
-        eq(friends.toUserId, toUserId),
-        eq(friends.status, "accepted")
+      or(
+        and(
+          eq(friends.fromUserId, fromUserId),
+          eq(friends.toUserId, toUserId),
+          eq(friends.status, "accepted")
+        ),
+        and(
+          eq(friends.fromUserId, toUserId),
+          eq(friends.toUserId, fromUserId),
+          eq(friends.status, "accepted")
+        )
       )
     );
 }
@@ -106,7 +134,7 @@ export async function deleteFriendRequest({
 }) {
   return db
     .update(friends)
-    .set({ isDeleted: true })
+    .set({ isDeleted: true, updatedAt: new Date() })
     .where(
       and(
         eq(friends.fromUserId, fromUserId),

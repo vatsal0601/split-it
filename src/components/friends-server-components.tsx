@@ -5,10 +5,16 @@ import size from "lodash/size";
 
 import { cn } from "@/lib/utils";
 import {
+  AddFriendButton,
+  DeleteConfirmationDialog,
+} from "@/components/friends-client-components";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
   CommandEmpty,
   CommandGroup,
   CommandList,
 } from "@/components/ui/command";
+import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { typography } from "@/components/ui/typography";
 import {
   AddFriendCommand as AddFriendClientCommand,
@@ -87,5 +93,66 @@ export async function AddFriendCommand({
         ) : null}
       </CommandList>
     </AddFriendClientCommand>
+  );
+}
+
+export function UserFriend({
+  currentUser,
+  fromUserId,
+  isShowingRequests,
+  isShowingSentRequests,
+}: {
+  currentUser: UserType;
+  fromUserId: string;
+  isShowingRequests: boolean;
+  isShowingSentRequests: boolean;
+}) {
+  const firstName = currentUser.firstName ?? "";
+  const lastName = currentUser.lastName ?? "";
+  const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
+
+  return (
+    <li className="flex items-center justify-between gap-4 rounded-md border p-3">
+      <div className="flex items-center gap-4">
+        <Avatar>
+          <AvatarImage src={currentUser.imageUrl} alt={userInitials} />
+          <AvatarFallback>{userInitials}</AvatarFallback>
+        </Avatar>
+        <div>
+          <h4 className={cn(typography({ variant: "p" }), "font-medium")}>
+            {currentUser.firstName} {currentUser.lastName}
+          </h4>
+          {!isNil(currentUser.username) ? (
+            <p className={typography({ variant: "muted" })}>
+              @{currentUser.username}
+            </p>
+          ) : null}
+        </div>
+      </div>
+      <Tooltip>
+        {isShowingRequests ? (
+          <AddFriendButton
+            username={currentUser.username}
+            fromUserId={fromUserId}
+            toUserId={currentUser.id}
+          />
+        ) : (
+          <DeleteConfirmationDialog
+            isShowingSentRequests={isShowingSentRequests}
+            fromUserId={fromUserId}
+            toUserId={currentUser.id}
+          />
+        )}
+        <TooltipContent side="bottom">
+          <span>
+            {isShowingRequests
+              ? "Add friend"
+              : isShowingSentRequests
+                ? "Delete sent request"
+                : "Delete friend"}
+          </span>
+        </TooltipContent>
+      </Tooltip>
+    </li>
   );
 }

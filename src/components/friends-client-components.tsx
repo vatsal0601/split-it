@@ -273,9 +273,14 @@ export function DeleteConfirmationDialog({
     <AlertDialog>
       <AlertDialogTrigger asChild>
         <TooltipTrigger asChild>
-          <button className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-destructive/90 hover:text-destructive-foreground">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleSubmit}
+            className="shrink-0 hover:bg-destructive/90 hover:text-destructive-foreground"
+          >
             <UserMinusIcon className="h-6 w-6" />
-          </button>
+          </Button>
         </TooltipTrigger>
       </AlertDialogTrigger>
       <AlertDialogContent>
@@ -337,16 +342,13 @@ export function AddFriendButton({
   }
 
   return (
-    <form ref={formRef} action={formAction} className="h-full">
+    <form ref={formRef} action={formAction} className="shrink-0">
       <input type="hidden" name="from-user-id" value={fromUserId} />
       <input type="hidden" name="to-user-id" value={toUserId} />
       <TooltipTrigger asChild>
-        <button
-          onClick={handleSubmit}
-          className="flex h-full items-center justify-center rounded-r-md border-l px-3 transition-colors hover:bg-primary/90 hover:text-primary-foreground"
-        >
+        <Button variant="ghost" size="icon" onClick={handleSubmit}>
           <UserPlusIcon className="h-6 w-6" />
-        </button>
+        </Button>
       </TooltipTrigger>
     </form>
   );

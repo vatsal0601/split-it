@@ -1,7 +1,9 @@
 import * as React from "react";
 import { redirect } from "next/navigation";
 import { clerkClient, currentUser } from "@clerk/nextjs";
-import { type User as UserType } from "@clerk/nextjs/server";
+import type { User } from "@clerk/nextjs/server";
+import flatten from "lodash/flatten";
+import isEmpty from "lodash/isEmpty";
 import isNil from "lodash/isNil";
 import size from "lodash/size";
 
@@ -12,81 +14,14 @@ import {
   getFriends,
 } from "@/db/friends";
 import { DashboardTabs } from "@/components/dashboard-tabs";
+import { FriendsToggle } from "@/components/friends-client-components";
 import {
-  AddFriendButton,
-  DeleteConfirmationDialog,
-  FriendsToggle,
-} from "@/components/friends-client-components";
-import { AddFriendCommand } from "@/components/friends-server-components";
+  AddFriendCommand,
+  UserFriend,
+} from "@/components/friends-server-components";
 import { SearchInput } from "@/components/search-input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { typography } from "@/components/ui/typography";
-
-function User({
-  currentUser,
-  fromUserId,
-  isShowingRequests,
-  isShowingSentRequests,
-}: {
-  currentUser: UserType;
-  fromUserId: string;
-  isShowingRequests: boolean;
-  isShowingSentRequests: boolean;
-}) {
-  const firstName = currentUser.firstName ?? "";
-  const lastName = currentUser.lastName ?? "";
-  const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
-
-  return (
-    <li className="flex items-center justify-between gap-4 rounded-md border">
-      <div className="flex items-center gap-4 p-3">
-        <Avatar>
-          <AvatarImage src={currentUser.imageUrl} alt={userInitials} />
-          <AvatarFallback>{userInitials}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h4 className={cn(typography({ variant: "p" }), "font-medium")}>
-            {currentUser.firstName} {currentUser.lastName}
-          </h4>
-          {!isNil(currentUser.username) ? (
-            <p className={typography({ variant: "muted" })}>
-              @{currentUser.username}
-            </p>
-          ) : null}
-        </div>
-      </div>
-      <Tooltip>
-        {isShowingRequests ? (
-          <AddFriendButton
-            username={currentUser.username}
-            fromUserId={fromUserId}
-            toUserId={currentUser.id}
-          />
-        ) : (
-          <DeleteConfirmationDialog
-            isShowingSentRequests={isShowingSentRequests}
-            fromUserId={fromUserId}
-            toUserId={currentUser.id}
-          />
-        )}
-        <TooltipContent side="bottom">
-          <span>
-            {isShowingRequests
-              ? "Add friend"
-              : isShowingSentRequests
-                ? "Delete sent request"
-                : "Delete friend"}
-          </span>
-        </TooltipContent>
-      </Tooltip>
-    </li>
-  );
-}
 
 export default async function Friends({
   searchParams,
@@ -103,7 +38,7 @@ export default async function Friends({
     redirect("/sign-in");
   }
 
-  let users: UserType[] = [];
+  let users: User[] = [];
   let friendIds: string[] = [];
   const friendRequestSent = await getFriendRequestsSent(user.id);
   const friendRequestSentIds = friendRequestSent.map((friend) => friend.userId);
@@ -117,7 +52,9 @@ export default async function Friends({
     friendIds = friendRequestSentIds;
   } else {
     const friends = await getFriends(user.id);
-    friendIds = friends.map((friend) => friend.userId);
+    friendIds = flatten(
+      friends.map((friend) => [friend.fromUserId, friend.toUserId])
+    );
   }
 
   if (size(friendIds) > 0) {
@@ -126,6 +63,11 @@ export default async function Friends({
       query: searchParams["search"],
     });
   }
+
+  users = users.filter((searchUser) => {
+    if (searchUser.id === user.id) return false;
+    return true;
+  });
 
   return (
     <>
@@ -155,7 +97,7 @@ export default async function Friends({
             <ul className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
               {users.map((currentUser) => {
                 return (
-                  <User
+                  <UserFriend
                     key={currentUser.id}
                     fromUserId={user.id}
                     currentUser={currentUser}
@@ -167,7 +109,7 @@ export default async function Friends({
             </ul>
           </TooltipProvider>
         ) : isShowingRequests || isShowingSentRequests ? (
-          <>
+          <div>
             <p
               className={cn(
                 typography({ variant: "h3" }),
@@ -181,9 +123,23 @@ export default async function Friends({
               {isShowingRequests ? "pending" : ""} friend requests, they will
               show up here.
             </p>
-          </>
+          </div>
+        ) : !isEmpty(searchParams["search"]) ? (
+          <div>
+            <p
+              className={cn(
+                typography({ variant: "h3" }),
+                "mb-2 mt-4 text-center"
+              )}
+            >
+              No results found
+            </p>
+            <p className={cn(typography({ variant: "muted" }), "text-center")}>
+              We couldn&apos;t find any users matching your search query.
+            </p>
+          </div>
         ) : (
-          <>
+          <div>
             <p
               className={cn(
                 typography({ variant: "h3" }),
@@ -195,7 +151,7 @@ export default async function Friends({
             <p className={cn(typography({ variant: "muted" }), "text-center")}>
               Click on the add friend button to add some friends
             </p>
-          </>
+          </div>
         )}
       </main>
     </>

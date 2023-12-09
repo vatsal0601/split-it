@@ -18,13 +18,21 @@ export function DashboardTabs({ activeTab }: { activeTab: keyof typeof TABS }) {
         {map(TABS, (value, key) => {
           const isActive = key === activeTab;
           return (
-            <Link key={key} href={value}>
+            <Link
+              key={key}
+              href={value}
+              className={cn(
+                "inline-block whitespace-nowrap border-b-2 border-transparent ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                !isActive && "hover:border-muted",
+                isActive && "border-primary"
+              )}
+            >
               <li
                 className={cn(
                   typography({ variant: "p" }),
-                  "inline-block border-b-2 border-transparent p-2 transition-colors md:px-4",
-                  !isActive && "text-muted-foreground hover:border-muted",
-                  isActive && "border-primary font-medium"
+                  "p-2 md:px-4",
+                  !isActive && "text-muted-foreground",
+                  isActive && "font-medium"
                 )}
               >
                 {key}

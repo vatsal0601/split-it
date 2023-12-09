@@ -20,7 +20,7 @@ export function Footer() {
           <HeartIcon className="mx-1 h-4 w-4 fill-destructive stroke-destructive" />
           <span>by</span>
           <Link
-            href="https://github.com/vatsal0601"
+            href="https://vatsalsakariya.vercel.app"
             target="_blank"
             rel="noopener noreferrer"
             className="ml-1 underline-offset-4 hover:underline"

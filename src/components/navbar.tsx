@@ -1,3 +1,4 @@
+import * as React from "react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
@@ -11,9 +12,10 @@ import isNil from "lodash/isNil";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { typography } from "@/components/ui/typography";
 
-export async function Navbar() {
+async function ServerUserButton() {
   const user = await currentUser();
 
   if (isNil(user)) {
@@ -24,6 +26,33 @@ export async function Navbar() {
   const lastName = user.lastName ?? "";
   const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
 
+  return (
+    <li className="h-10">
+      <ClerkLoading>
+        <Avatar>
+          <AvatarImage src={user.imageUrl} alt={userInitials} />
+          <AvatarFallback>{userInitials}</AvatarFallback>
+        </Avatar>
+      </ClerkLoading>
+      <ClerkLoaded>
+        <div className="h-10 w-10 rounded-full">
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: "w-10 h-10",
+                userButtonPopoverCard:
+                  "rounded-md border border-accent bg-popover shadow-md",
+              },
+            }}
+            afterSignOutUrl="/"
+          />
+        </div>
+      </ClerkLoaded>
+    </li>
+  );
+}
+
+export function Navbar() {
   return (
     <header className="py-2 lg:py-4">
       <nav className="container flex items-center justify-between">
@@ -44,28 +73,11 @@ export async function Navbar() {
               </Link>
             </Button>
           </li>
-          <li className="h-10">
-            <ClerkLoading>
-              <Avatar>
-                <AvatarImage src={user.imageUrl} alt={userInitials} />
-                <AvatarFallback>{userInitials}</AvatarFallback>
-              </Avatar>
-            </ClerkLoading>
-            <ClerkLoaded>
-              <div className="h-10 w-10 rounded-full">
-                <UserButton
-                  appearance={{
-                    elements: {
-                      avatarBox: "w-10 h-10",
-                      userButtonPopoverCard:
-                        "rounded-md border border-accent bg-popover shadow-md",
-                    },
-                  }}
-                  afterSignOutUrl="/"
-                />
-              </div>
-            </ClerkLoaded>
-          </li>
+          <React.Suspense
+            fallback={<Skeleton className="h-10 w-10 rounded-full" />}
+          >
+            <ServerUserButton />
+          </React.Suspense>
         </ul>
       </nav>
     </header>
