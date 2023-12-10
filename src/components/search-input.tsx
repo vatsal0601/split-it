@@ -58,9 +58,9 @@ export function SearchInput({ initialValue, ...props }: SearchInputProps) {
         </span>
       ) : !isEmpty(search) ? (
         <Button
+          onClick={handleClear}
           variant="ghost"
           size="icon"
-          onClick={handleClear}
           className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 opacity-50"
         >
           <XIcon />

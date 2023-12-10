@@ -1,4 +1,3 @@
-import * as React from "react";
 import { redirect } from "next/navigation";
 import { clerkClient, currentUser } from "@clerk/nextjs";
 import type { User } from "@clerk/nextjs/server";
@@ -64,15 +63,12 @@ export default async function Friends({
     });
   }
 
-  users = users.filter((searchUser) => {
-    if (searchUser.id === user.id) return false;
-    return true;
-  });
+  users = users.filter((searchUser) => searchUser.id !== user.id);
 
   return (
     <>
       <DashboardTabs activeTab="Friends" />
-      <main className="container h-full space-y-10">
+      <main className="container min-h-full space-y-10 pb-32">
         <div className="space-y-5">
           <div className="flex flex-col items-end justify-between gap-4 md:flex-row-reverse md:items-center">
             <AddFriendCommand

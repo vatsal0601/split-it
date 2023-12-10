@@ -64,11 +64,11 @@ export function AddFriendCommand({
 
   return (
     <>
-      <Button onClick={openCommand} size="sm" className="sm:hidden">
+      <Button onClick={openCommand} size="sm" className="md:hidden">
         <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
         <span>Add friend</span>
       </Button>
-      <Button onClick={openCommand} className="hidden sm:inline-flex">
+      <Button onClick={openCommand} className="hidden md:inline-flex">
         <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
         <span>Add friend</span>
       </Button>
@@ -274,9 +274,9 @@ export function DeleteConfirmationDialog({
       <AlertDialogTrigger asChild>
         <TooltipTrigger asChild>
           <Button
+            onClick={handleSubmit}
             variant="ghost"
             size="icon"
-            onClick={handleSubmit}
             className="shrink-0 hover:bg-destructive/90 hover:text-destructive-foreground"
           >
             <UserMinusIcon className="h-6 w-6" />
@@ -346,7 +346,7 @@ export function AddFriendButton({
       <input type="hidden" name="from-user-id" value={fromUserId} />
       <input type="hidden" name="to-user-id" value={toUserId} />
       <TooltipTrigger asChild>
-        <Button variant="ghost" size="icon" onClick={handleSubmit}>
+        <Button onClick={handleSubmit} variant="ghost" size="icon">
           <UserPlusIcon className="h-6 w-6" />
         </Button>
       </TooltipTrigger>

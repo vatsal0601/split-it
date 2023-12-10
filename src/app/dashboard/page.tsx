@@ -83,7 +83,7 @@ export default async function Dashboard() {
   return (
     <>
       <DashboardTabs activeTab="Dashboard" />
-      <main className="container h-full">
+      <main className="container min-h-full pb-32">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="flex flex-col lg:col-span-2">
             <CardHeader>

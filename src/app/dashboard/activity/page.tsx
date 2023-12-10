@@ -14,7 +14,7 @@ export default async function Activity() {
   return (
     <>
       <DashboardTabs activeTab="Activity" />
-      <main className="container h-full">
+      <main className="container min-h-full space-y-10 pb-32">
         <h1>Activity 🚀</h1>
       </main>
     </>
