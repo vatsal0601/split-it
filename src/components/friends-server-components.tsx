@@ -1,3 +1,4 @@
+import * as React from "react";
 import { clerkClient } from "@clerk/nextjs";
 import { type User as UserType } from "@clerk/nextjs/server";
 import isNil from "lodash/isNil";
@@ -14,6 +15,7 @@ import {
   CommandGroup,
   CommandList,
 } from "@/components/ui/command";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tooltip, TooltipContent } from "@/components/ui/tooltip";
 import { typography } from "@/components/ui/typography";
 import {
@@ -22,7 +24,7 @@ import {
   CommandUser,
 } from "./friends-client-components";
 
-export async function AddFriendCommand({
+async function AddFriendCommandInternal({
   userId,
   addFriendParam,
   friendIds,
@@ -55,42 +57,71 @@ export async function AddFriendCommand({
     return true;
   });
 
+  if (size(searchUsers) > 0) {
+    return (
+      <CommandGroup>
+        <p className={cn(typography({ variant: "muted" }), "mb-2")}>
+          Click on the user or press enter to send them friend request
+        </p>
+        {searchUsers.map((searchUser) => {
+          const firstName = searchUser.firstName ?? "";
+          const lastName = searchUser.lastName ?? "";
+          const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
+
+          return (
+            <CommandUser
+              key={searchUser.id}
+              fromUserId={userId}
+              toUserId={searchUser.id}
+              firstName={firstName}
+              lastName={lastName}
+              username={searchUser.username}
+              userInitials={userInitials}
+              prfileImage={searchUser.imageUrl}
+            />
+          );
+        })}
+      </CommandGroup>
+    );
+  }
+
+  return null;
+}
+
+export function AddFriendCommand({
+  userId,
+  addFriendParam,
+  friendIds,
+  friendRequestSentIds,
+}: {
+  userId: string;
+  addFriendParam: string | undefined;
+  friendIds: string[];
+  friendRequestSentIds: string[];
+}) {
   return (
     <AddFriendClientCommand isCommandOpen={!isNil(addFriendParam)}>
       <AddFriendInput initialValue={addFriendParam === "true" ? "" : ""} />
       <CommandList className="my-2 transition-[height]">
         <CommandEmpty>
-          <p className="px-2">
-            {size(searchUsers) > 0
-              ? "No results found"
-              : "You've either added all our users to your friend list or have sent friend request to them"}
-          </p>
+          <p className="px-2">No results found</p>
         </CommandEmpty>
-        {size(searchUsers) > 0 ? (
-          <CommandGroup>
-            <p className={cn(typography({ variant: "muted" }), "mb-2")}>
-              Click on the user or press enter to send them friend request
-            </p>
-            {searchUsers.map((searchUser) => {
-              const firstName = searchUser.firstName ?? "";
-              const lastName = searchUser.lastName ?? "";
-              const userInitials = `${firstName[0] ?? ""}${lastName[0] ?? ""}`;
-
-              return (
-                <CommandUser
-                  key={searchUser.id}
-                  fromUserId={userId}
-                  toUserId={searchUser.id}
-                  firstName={firstName}
-                  lastName={lastName}
-                  username={searchUser.username}
-                  userInitials={userInitials}
-                  prfileImage={searchUser.imageUrl}
-                />
-              );
-            })}
-          </CommandGroup>
-        ) : null}
+        <React.Suspense
+          fallback={
+            <div className="space-y-2">
+              <Skeleton className="m-2 mt-5 h-14 w-full" />
+              <Skeleton className="m-2 mt-5 h-14 w-full" />
+              <Skeleton className="m-2 mt-5 h-14 w-full" />
+            </div>
+          }
+        >
+          <AddFriendCommandInternal
+            userId={userId}
+            addFriendParam={addFriendParam}
+            friendIds={friendIds}
+            friendRequestSentIds={friendRequestSentIds}
+          />
+        </React.Suspense>
       </CommandList>
     </AddFriendClientCommand>
   );

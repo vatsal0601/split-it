@@ -66,7 +66,7 @@ async function FriendRequestsCard({ user }: { user: User }) {
       <Button variant="secondary" className="w-full rounded-t-none" asChild>
         <Link href="/dashboard/friends?show-requests=received">
           <span className="mr-2">View all friend requests</span>
-          <MoveRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+          <MoveRightIcon className="size-4 lg:size-5" />
         </Link>
       </Button>
     </Card>
@@ -108,7 +108,7 @@ export default async function Dashboard() {
             >
               <Link href="/dashboard/activity">
                 <span className="mr-2">View all activity</span>
-                <MoveRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+                <MoveRightIcon className="size-4 lg:size-5" />
               </Link>
             </Button>
           </Card>
@@ -138,7 +138,7 @@ export default async function Dashboard() {
             >
               <Link href="/dashboard/friends?show-requests=received">
                 <span className="mr-2">View all groups</span>
-                <MoveRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+                <MoveRightIcon className="size-4 lg:size-5" />
               </Link>
             </Button>
           </Card>

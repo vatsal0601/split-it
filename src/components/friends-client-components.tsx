@@ -65,11 +65,11 @@ export function AddFriendCommand({
   return (
     <>
       <Button onClick={openCommand} size="sm" className="md:hidden">
-        <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+        <PlusIcon className="mr-2 size-4 lg:size-5" />
         <span>Add friend</span>
       </Button>
       <Button onClick={openCommand} className="hidden md:inline-flex">
-        <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+        <PlusIcon className="mr-2 size-4 lg:size-5" />
         <span>Add friend</span>
       </Button>
       <CommandDialog
@@ -143,8 +143,9 @@ function CommandUserInternal({
       onSelect={handleSubmit}
       className="cursor-pointer gap-2 disabled:opacity-50"
       disabled={pending}
+      value={username ?? ""}
     >
-      <Avatar className={cn("h-6 w-6", pending && "opacity-50")}>
+      <Avatar className={cn("size-6", pending && "opacity-50")}>
         <AvatarImage src={prfileImage} alt={userInitials} />
         <AvatarFallback>{userInitials}</AvatarFallback>
       </Avatar>
@@ -279,7 +280,7 @@ export function DeleteConfirmationDialog({
             size="icon"
             className="shrink-0 hover:bg-destructive/90 hover:text-destructive-foreground"
           >
-            <UserMinusIcon className="h-6 w-6" />
+            <UserMinusIcon className="size-6" />
           </Button>
         </TooltipTrigger>
       </AlertDialogTrigger>
@@ -347,7 +348,7 @@ export function AddFriendButton({
       <input type="hidden" name="to-user-id" value={toUserId} />
       <TooltipTrigger asChild>
         <Button onClick={handleSubmit} variant="ghost" size="icon">
-          <UserPlusIcon className="h-6 w-6" />
+          <UserPlusIcon className="size-6" />
         </Button>
       </TooltipTrigger>
     </form>

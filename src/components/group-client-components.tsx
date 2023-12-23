@@ -37,13 +37,8 @@ function Tag({
   return (
     <span className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-sm text-secondary-foreground">
       <span className="mr-1">@{username}</span>
-      <Button
-        onClick={onRemove}
-        variant="ghost"
-        size="icon"
-        className="h-5 w-5"
-      >
-        <XIcon className="h-4 w-4 text-secondary-foreground" />
+      <Button onClick={onRemove} variant="ghost" size="icon" className="size-5">
+        <XIcon className="size-4 text-secondary-foreground" />
       </Button>
     </span>
   );
@@ -76,11 +71,11 @@ export function CreateGroupDialog({
   return (
     <>
       <Button onClick={openDialog} size="sm" className="md:hidden">
-        <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+        <PlusIcon className="mr-2 size-4 lg:size-5" />
         <span>Create group</span>
       </Button>
       <Button onClick={openDialog} className="hidden md:inline-flex">
-        <PlusIcon className="mr-2 h-4 w-4 lg:h-5 lg:w-5" />
+        <PlusIcon className="mr-2 size-4 lg:size-5" />
         <span>Create group</span>
       </Button>
       <Dialog open={isDialogOpen} onOpenChange={onDialogChange}>
@@ -150,7 +145,7 @@ export function GroupDialogContent({ users }: GroupDialogProps) {
               </div>
               <PopoverTrigger asChild>
                 <Button variant="secondary" size="icon" className="shrink-0">
-                  <PlusIcon className="h-4 w-4 text-secondary-foreground" />
+                  <PlusIcon className="size-4 text-secondary-foreground" />
                 </Button>
               </PopoverTrigger>
             </div>

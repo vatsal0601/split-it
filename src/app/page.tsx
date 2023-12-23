@@ -37,14 +37,14 @@ export default async function Home() {
               <span className="mr-2">
                 {isUserSignedIn ? "Go to dashboard" : "Get Started"}
               </span>
-              <LogInIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+              <LogInIcon className="size-4 lg:size-5" />
             </Link>
           </Button>
 
           <Button variant="ghost" asChild>
             <Link href="/split">
               <span className="mr-2">Split bill</span>
-              <ArrowRightIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+              <ArrowRightIcon className="size-4 lg:size-5" />
             </Link>
           </Button>
         </div>

@@ -35,11 +35,11 @@ async function ServerUserButton() {
         </Avatar>
       </ClerkLoading>
       <ClerkLoaded>
-        <div className="h-10 w-10 rounded-full">
+        <div className="size-10 rounded-full">
           <UserButton
             appearance={{
               elements: {
-                avatarBox: "w-10 h-10",
+                avatarBox: "size-10",
                 userButtonPopoverCard:
                   "rounded-md border border-accent bg-popover shadow-md",
               },
@@ -74,7 +74,7 @@ export function Navbar() {
             </Button>
           </li>
           <React.Suspense
-            fallback={<Skeleton className="h-10 w-10 rounded-full" />}
+            fallback={<Skeleton className="size-10 rounded-full" />}
           >
             <ServerUserButton />
           </React.Suspense>

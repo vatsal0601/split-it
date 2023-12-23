@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { DashboardTabs } from "@/components/dashboard-tabs";
 import { CreateGroupDialog } from "@/components/group-server-components";
 import { SearchInput } from "@/components/search-input";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardDescription,

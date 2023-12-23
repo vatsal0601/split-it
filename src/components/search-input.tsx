@@ -53,7 +53,7 @@ export function SearchInput({ initialValue, ...props }: SearchInputProps) {
         {...props}
       />
       {isPending ? (
-        <span className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 opacity-50">
+        <span className="absolute right-2 top-1/2 size-6 -translate-y-1/2 opacity-50">
           <Loader2Icon className="animate-spin" />
         </span>
       ) : !isEmpty(search) ? (
@@ -61,7 +61,7 @@ export function SearchInput({ initialValue, ...props }: SearchInputProps) {
           onClick={handleClear}
           variant="ghost"
           size="icon"
-          className="absolute right-2 top-1/2 h-6 w-6 -translate-y-1/2 opacity-50"
+          className="absolute right-2 top-1/2 size-6 -translate-y-1/2 opacity-50"
         >
           <XIcon />
         </Button>
